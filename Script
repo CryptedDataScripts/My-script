@@ -13,6 +13,7 @@ local Red = Instance.new("TextBox")
 local Green = Instance.new("TextBox")
 local Blue = Instance.new("TextBox")
 local TextLabel = Instance.new("TextLabel")
+local ToggleHitbox = Instance.new("TextButton") -- New button
 
 -- Properties:
 
@@ -38,6 +39,7 @@ Open.TextWrapped = true
 Open.Draggable = true -- Make the button draggable
 
 local isOpen = false
+local hitboxEnabled = false -- Hitbox toggle state
 
 Open.MouseButton1Click:Connect(function()
     isOpen = not isOpen
@@ -97,16 +99,6 @@ Green.Text = ""
 Green.TextColor3 = Color3.fromRGB(0, 0, 0)
 Green.TextSize = 14.000
 
-TextLabel.Parent = main
-TextLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-TextLabel.Position = UDim2.new(0.471, 0, 0.326, 0)
-TextLabel.Size = UDim2.new(0, 140, 0, 37)
-TextLabel.Font = Enum.Font.SourceSans
-TextLabel.Text = "Colors!"
-TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel.TextScaled = true
-TextLabel.TextWrapped = true
-
 Blue.Name = "Blue"
 Blue.Parent = main
 Blue.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
@@ -118,14 +110,59 @@ Blue.Text = ""
 Blue.TextColor3 = Color3.fromRGB(0, 0, 0)
 Blue.TextSize = 14.000
 
+TextLabel.Parent = main
+TextLabel.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+TextLabel.Position = UDim2.new(0.471, 0, 0.326, 0)
+TextLabel.Size = UDim2.new(0, 140, 0, 37)
+TextLabel.Font = Enum.Font.SourceSans
+TextLabel.Text = "Colors!"
+TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel.TextScaled = true
+TextLabel.TextWrapped = true
+
+-- Toggle Hitbox Button
+ToggleHitbox.Name = "ToggleHitbox"
+ToggleHitbox.Parent = main
+ToggleHitbox.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+ToggleHitbox.Position = UDim2.new(0.3, 0, 0.7, 0)
+ToggleHitbox.Size = UDim2.new(0, 140, 0, 50)
+ToggleHitbox.Font = Enum.Font.SourceSans
+ToggleHitbox.Text = "Enable Hitbox"
+ToggleHitbox.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleHitbox.TextScaled = true
+ToggleHitbox.TextWrapped = true
+
+ToggleHitbox.MouseButton1Click:Connect(function()
+    hitboxEnabled = not hitboxEnabled
+    ToggleHitbox.Text = hitboxEnabled and "Disable Hitbox" or "Enable Hitbox"
+
+    if not hitboxEnabled then
+        -- Reset hitbox size and transparency when disabled
+        for _, player in pairs(game:GetService('Players'):GetPlayers()) do
+            if player.Name ~= game:GetService('Players').LocalPlayer.Name then
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    player.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1) -- Default size
+                    player.Character.HumanoidRootPart.Transparency = 0 -- Reset transparency
+                    player.Character.HumanoidRootPart.Color = Color3.new(1, 1, 1) -- Reset color
+                    player.Character.HumanoidRootPart.Material = Enum.Material.Plastic -- Reset material
+                end
+            end
+        end
+    end
+end)
+
 game:GetService('RunService').RenderStepped:Connect(function()
-    for i, v in next, game:GetService('Players'):GetPlayers() do
-        if v.Name ~= game:GetService('Players').LocalPlayer.Name then
-            v.Character.HumanoidRootPart.Size = Vector3.new(tonumber(HitBox.Text) or 1, tonumber(HitBox.Text) or 1, tonumber(HitBox.Text) or 1)
-            v.Character.HumanoidRootPart.Transparency = 0.8
-            v.Character.HumanoidRootPart.Color = Color3.new(tonumber(Red.Text) or 0, tonumber(Green.Text) or 0, tonumber(Blue.Text) or 0)
-            v.Character.HumanoidRootPart.Material = "Neon"
-            v.Character.HumanoidRootPart.CanCollide = false
+    if hitboxEnabled then
+        for _, player in pairs(game:GetService('Players'):GetPlayers()) do
+            if player.Name ~= game:GetService('Players').LocalPlayer.Name then
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    player.Character.HumanoidRootPart.Size = Vector3.new(tonumber(HitBox.Text) or 2, tonumber(HitBox.Text) or 2, tonumber(HitBox.Text) or 2)
+                    player.Character.HumanoidRootPart.Transparency = 0.8
+                    player.Character.HumanoidRootPart.Color = Color3.new(tonumber(Red.Text) or 0, tonumber(Green.Text) or 0, tonumber(Blue.Text) or 0)
+                    player.Character.HumanoidRootPart.Material = Enum.Material.Neon
+                    player.Character.HumanoidRootPart.CanCollide = false
+                end
+            end
         end
     end
 end)
